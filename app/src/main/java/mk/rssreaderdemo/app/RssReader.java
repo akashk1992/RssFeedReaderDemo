@@ -30,35 +30,34 @@ import java.net.URL;
 
 public class RssReader {
 
-    public static RssFeed read(URL url) throws SAXException, IOException {
+  public static RssFeed read(URL url) throws SAXException, IOException {
 
-        return read(url.openStream());
+    return read(url.openStream());
 
+  }
+
+  public static RssFeed read(InputStream stream) throws SAXException, IOException {
+
+    try {
+
+      SAXParserFactory factory = SAXParserFactory.newInstance();
+      SAXParser parser = factory.newSAXParser();
+      XMLReader reader = parser.getXMLReader();
+      RssHandler handler = new RssHandler();
+      InputSource input = new InputSource(stream);
+      reader.setContentHandler(handler);
+      reader.parse(input);
+
+      return handler.getResult();
+
+    } catch (ParserConfigurationException e) {
+      throw new SAXException();
     }
 
-    public static RssFeed read(InputStream stream) throws SAXException, IOException {
+  }
 
-        try {
-
-            SAXParserFactory factory = SAXParserFactory.newInstance();
-            SAXParser parser = factory.newSAXParser();
-            XMLReader reader = parser.getXMLReader();
-            RssHandler handler = new RssHandler();
-            InputSource input = new InputSource(stream);
-
-            reader.setContentHandler(handler);
-            reader.parse(input);
-
-            return handler.getResult();
-
-        } catch (ParserConfigurationException e) {
-            throw new SAXException();
-        }
-
-    }
-
-    public static RssFeed read(String source) throws SAXException, IOException {
-        return read(new ByteArrayInputStream(source.getBytes()));
-    }
+  public static RssFeed read(String source) throws SAXException, IOException {
+    return read(new ByteArrayInputStream(source.getBytes()));
+  }
 
 }

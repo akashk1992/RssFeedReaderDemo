@@ -7,18 +7,18 @@
                 android:paddingTop="@dimen/activity_vertical_margin"
                 android:paddingBottom="@dimen/activity_vertical_margin"
                 tools:context=".MainActivity">
-    <android.support.v4.view.ViewPager
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:id="@+id/pager"/>
+    <TextView android:layout_width="match_parent"
+              android:layout_height="wrap_content"
+              android:id="@+id/frag_heading"/>
     <ImageView android:layout_width="match_parent"
                android:layout_height="wrap_content"
-               android:id="@+id/image"/>
+               android:layout_below="@id/frag_heading"
+               android:id="@+id/frag_image"/>
     <TextView
-            android:id="@+id/text"
+            android:id="@+id/frag_text"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_below="@+id/image"
+            android:layout_below="@+id/frag_image"
             android:layout_marginTop="5dp"/>
 
 </RelativeLayout>
