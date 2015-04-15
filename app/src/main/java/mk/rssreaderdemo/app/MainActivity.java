@@ -20,8 +20,10 @@ import org.xml.sax.SAXException;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
+import java.net.SocketTimeoutException;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.List;
 
 
 public class MainActivity extends FragmentActivity {
@@ -35,7 +37,7 @@ public class MainActivity extends FragmentActivity {
   private String title;
   private String description;
   private ViewPager pager;
-  ArrayList<String> linksList = new ArrayList<String>();
+  public static List<Document> docsList = new ArrayList<Document>();
 
   @Override
   protected void onCreate(Bundle savedInstanceState) {
@@ -73,7 +75,7 @@ public class MainActivity extends FragmentActivity {
     protected Object doInBackground(Object[] params) {
       try {
         // pass source rss feed, eg: sports rss feed -- Andhra wishes
-        url = new URL("http://www.sarkarimirror.com/feed/");
+        url = new URL("http://timesofindia.indiatimes.com/rssfeedstopstories.cms");
         feed = RssReader.read(url);
         rssItems = feed.getRssItems();
       } catch (MalformedURLException e) {
@@ -83,7 +85,7 @@ public class MainActivity extends FragmentActivity {
       } catch (IOException e) {
         e.printStackTrace();
       }
-      //parseTimesOfIndia();
+      parseTimesOfIndia();
 //      parseAndhraWishes();
 //      parseTheHindu();
 //      parseNdtv();
@@ -106,7 +108,6 @@ public class MainActivity extends FragmentActivity {
 //      parseMSNNews();
 //      parseGoalIndiaNews();
 //      parseCaravenMagzineNews();
-      parseSarkariMirrorNewsDemo();
 //      parseSarkariMirrorNews();
 
 
@@ -115,13 +116,7 @@ public class MainActivity extends FragmentActivity {
 
     @Override
     protected void onPostExecute(Object o) {
-      pager.setAdapter(new NewsFragmentAdapter(getSupportFragmentManager()));
-    }
-  }
-
-  public void parseSarkariMirrorNewsDemo() {
-    for (int i = 0; i < rssItems.size(); i++) {
-      linksList.add(rssItems.get(i).getLink());
+//      pager.setAdapter(new NewsFragmentAdapter(getSupportFragmentManager()));
     }
   }
 
@@ -129,13 +124,14 @@ public class MainActivity extends FragmentActivity {
     for (int i = 0; i < rssItems.size(); i++) {
       try {
         doc = Jsoup.connect(rssItems.get(i).getLink()).get();
-        linksList.add(rssItems.get(i).getLink());
-//        Log.d("test", "Links: " + rssItems.get(i).getLink());
+        docsList.add(doc);
+      } catch (SocketTimeoutException socketException) {
+
       } catch (IOException e) {
         e.printStackTrace();
       }
 
-      Element titleEle = doc.select("#left > div.single > div.active > h1 > a").first();
+     /* Element titleEle = doc.select("#left > div.single > div.active > h1 > a").first();
       Element imageEle = doc.select("div.content div a img.imgf").first();
       Elements descriptionEle = doc.select("div.pf-content");
       description = descriptionEle.text();
@@ -145,7 +141,7 @@ public class MainActivity extends FragmentActivity {
         title = titleEle.text();
       Log.d("test", "Title: " + title);
       Log.d("test", "Image Source: " + imageSrc);
-      Log.d("test", "Description: " + description);
+      Log.d("test", "Description: " + description);*/
     }
   }
 
@@ -806,27 +802,24 @@ public class MainActivity extends FragmentActivity {
   }
 
   private void parseTimesOfIndia() {
-    //for (int i = 0; i < rssItems.size(); i++) {
-    try {
-      doc = Jsoup.connect("http://timesofindia.indiatimes.com/sports/badminton/No-badminton-tournament-safe-from-fixing-says-Vittinghus/articleshow/46904575.cms").get();
-    } catch (IOException e) {
-      e.printStackTrace();
+    for (int i = 0; i < rssItems.size(); i++) {
+      try {
+        doc = Jsoup.connect(rssItems.get(i).getLink()).get();
+      } catch (IOException e) {
+        e.printStackTrace();
+      }
+      Log.d("test", "Link: " + rssItems.get(i).getLink());
+      Element titleEle = doc.select("#s_content > div.flL.left_bdr > span.arttle > h1,span.arttle h1,div.article h2").first();
+      Element imageEle = doc.select("#bellyad > div > div.flL_pos > img").first();
+      Element descriptionEle = doc.select("div#artext1").first();
+      if (imageEle != null)
+        imageSrc = imageEle.absUrl("src");
+      if (titleEle != null)
+        title = titleEle.text();
+      Log.d("test", "Title: " + title);
+      Log.d("test", "Image source: " + imageSrc);
+      Log.d("test", "Description: " + descriptionEle.text());
     }
-
-    Element titleEle = doc.select("#s_content > div.flL.left_bdr > span.arttle > h1,span.arttle h1,div.article h2").first();
-    Element imageEle = doc.select("#bellyad > div > div.flL_pos > img").first();
-    Elements descriptionEle = doc.select("#artext1 > div,#storydiv > div.section1 > div,div.article > div.content");
-    if (imageEle != null)
-      imageSrc = imageEle.absUrl("src");
-    if (titleEle != null)
-      title = titleEle.text();
-    Log.d("test", "Title: " + title);
-    Log.d("test", "Image source:: " + imageSrc);
-//      Log.d("test", "Description: "+descriptionEle.text());
-    for (Element e : descriptionEle) {
-      Log.d("test", "Description: " + e.text());
-    }
-    //}
   }
 
   private void parseAndhraWishes() {
@@ -973,8 +966,8 @@ public class MainActivity extends FragmentActivity {
 
     @Override
     public Fragment getItem(int i) {
-      Log.d("test", " "+i);
-      return new NewsFragment().newInstance(linksList, i);
+      Log.d("test", " " + i);
+      return new NewsFragment().newInstance(i);
     }
 
 

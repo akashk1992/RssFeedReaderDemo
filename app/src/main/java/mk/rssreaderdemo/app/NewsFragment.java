@@ -10,12 +10,10 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 import com.squareup.picasso.Picasso;
-import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
-import java.io.IOException;
 import java.util.ArrayList;
 
 /**
@@ -29,10 +27,9 @@ public class NewsFragment extends Fragment {
   private ImageView fragImageView;
   private TextView fragTextView;
 
-  public Fragment newInstance(ArrayList<String> list, int pos) {
+  public Fragment newInstance(int pos) {
     Bundle bundle = new Bundle();
     bundle.putInt("pos", pos);
-    bundle.putStringArrayList("links", list);
     NewsFragment newsFragment = new NewsFragment();
     newsFragment.setArguments(bundle);
     return newsFragment;
@@ -45,21 +42,7 @@ public class NewsFragment extends Fragment {
     fragTextView = (TextView) view.findViewById(R.id.frag_text);
     Bundle bundle = getArguments();
     int pos = bundle.getInt("pos");
-    links = bundle.getStringArrayList("links");
-//    parseSarkariMirrorNews(pos);
-
-    return view;
-  }
-
-  private void parseSarkariMirrorNews(int pos) {
-    Document doc = null;
-    try {
-      doc = Jsoup.connect(links.get(pos)).get();
-//        Log.d("test", "Links: " + rssItems.get(i).getLink());
-    } catch (IOException e) {
-      e.printStackTrace();
-    }
-
+    Document doc= MainActivity.docsList.get(pos);
     Element titleEle = doc.select("#left > div.single > div.active > h1 > a").first();
     Element imageEle = doc.select("div.content div a img.imgf").first();
     Elements descriptionEle = doc.select("div.pf-content");
@@ -73,5 +56,8 @@ public class NewsFragment extends Fragment {
     Log.d("test", "Description: " + description);
     Picasso.with(getActivity()).load(imageSrc).into(fragImageView);
     fragTextView.setText(description);
+//    parseSarkariMirrorNews(pos);
+
+    return view;
   }
 }
