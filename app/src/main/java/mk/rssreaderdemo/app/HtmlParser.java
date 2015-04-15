@@ -1,5 +1,6 @@
 package mk.rssreaderdemo.app;
 
+import android.util.Log;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -32,6 +33,29 @@ public class HtmlParser {
 //    parseReutersIndia();
 //    parseSiliconIndiaNews();
 //    parseInformationWeekNews();
+    parseStartupHyderabad();
+  }
+  private static void parseStartupHyderabad() {
+    for (int i = 0; i < rssItems.size(); i++) {
+      try {
+        doc = Jsoup.connect(rssItems.get(i).getLink()).get();
+//        Log.d("test", "Links: " + rssItems.get(i).getLink());
+      } catch (IOException e) {
+        e.printStackTrace();
+      }
+
+      Element titleEle = doc.select("h2.entry-title").first();
+      Element imageEle = doc.select("#main > div.main_content_wrapper > p:nth-child(4) > img,div.entry-content > p:nth-child(4) > img,div.entry-content > p:nth-child(3) img").first();
+      Elements descriptionEle = doc.select("div.main_content_wrapper");
+      description = descriptionEle.text();
+      if (imageEle != null)
+        imageSrc = imageEle.absUrl("src");
+      if (titleEle != null)
+        title = titleEle.text();
+      Log.d("test", "Title: " + title);
+      Log.d("test", "Image Source: " + imageSrc);
+      Log.d("test", "Description: " + description);
+    }
   }
 
   private static void parseTimesOfIndia() {

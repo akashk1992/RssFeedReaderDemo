@@ -12,6 +12,10 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.ImageView;
 import android.widget.TextView;
+import org.htmlcleaner.CleanerProperties;
+import org.htmlcleaner.HtmlCleaner;
+import org.htmlcleaner.TagNode;
+import org.htmlcleaner.XPatherException;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -19,9 +23,11 @@ import org.jsoup.select.Elements;
 import org.xml.sax.SAXException;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.SocketTimeoutException;
 import java.net.URL;
+import java.net.URLConnection;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -38,6 +44,7 @@ public class MainActivity extends FragmentActivity {
   private String description;
   private ViewPager pager;
   public static List<Document> docsList = new ArrayList<Document>();
+  private HtmlCleaner htmlCleaner;
 
   @Override
   protected void onCreate(Bundle savedInstanceState) {
@@ -46,6 +53,13 @@ public class MainActivity extends FragmentActivity {
     imageView = (ImageView) findViewById(R.id.image);
     textView = (TextView) findViewById(R.id.text);
     pager = (ViewPager) findViewById(R.id.pager);
+    htmlCleaner = new HtmlCleaner();
+    CleanerProperties props = htmlCleaner.getProperties();
+    props.setCharset("UTF-8");
+    props.setAllowHtmlInsideAttributes(false);
+    props.setAllowMultiWordAttributes(true);
+    props.setRecognizeUnicodeChars(true);
+    props.setOmitComments(true);
 //    pager.setAdapter(new NewsFragmentAdapter(getSupportFragmentManager()));
     new RssAsyncTask().execute();
   }
@@ -75,7 +89,7 @@ public class MainActivity extends FragmentActivity {
     protected Object doInBackground(Object[] params) {
       try {
         // pass source rss feed, eg: sports rss feed -- Andhra wishes
-        url = new URL("http://timesofindia.indiatimes.com/rssfeedstopstories.cms");
+        url = new URL("http://startuphyderabad.com/feed");
         feed = RssReader.read(url);
         rssItems = feed.getRssItems();
       } catch (MalformedURLException e) {
@@ -85,7 +99,7 @@ public class MainActivity extends FragmentActivity {
       } catch (IOException e) {
         e.printStackTrace();
       }
-      parseTimesOfIndia();
+//      parseTimesOfIndia();
 //      parseAndhraWishes();
 //      parseTheHindu();
 //      parseNdtv();
@@ -109,6 +123,13 @@ public class MainActivity extends FragmentActivity {
 //      parseGoalIndiaNews();
 //      parseCaravenMagzineNews();
 //      parseSarkariMirrorNews();
+      parseStartupHyderabad();
+
+      /*try {
+        parseHtmlUsingXpath();
+      } catch (Exception e) {
+        e.printStackTrace();
+      }*/
 
 
       return null;
@@ -117,6 +138,63 @@ public class MainActivity extends FragmentActivity {
     @Override
     protected void onPostExecute(Object o) {
 //      pager.setAdapter(new NewsFragmentAdapter(getSupportFragmentManager()));
+    }
+  }
+
+  /*private void parseHtmlUsingXpath() throws Exception {
+    String stats = "";
+    final String BLOG_URL = "http://timesofindia.indiatimes.com/india/2G-scam-Raja-misled-Manmohan-changed-cut-off-date-to-favour-firms-CBI-says/articleshow/46928840.cms";
+    // XPath query
+    final String XPATH_STATS = "/*//*[@id=\"bellyad\"]/div/div[1]/img";
+    // config cleaner properties
+    HtmlCleaner htmlCleaner = new HtmlCleaner();
+    CleanerProperties props = htmlCleaner.getProperties();
+    props.setAllowHtmlInsideAttributes(false);
+    props.setAllowMultiWordAttributes(true);
+    props.setRecognizeUnicodeChars(true);
+    props.setOmitComments(true);
+
+    // create URL object
+    // get HTML page root node
+    TagNode root = null;
+    URL url = new URL(BLOG_URL);
+    root = htmlCleaner.clean(url);
+    Object[] statsNode = root.evaluateXPath(XPATH_STATS);
+
+    // query XPath
+    // process data if found any node
+    if (statsNode.length > 0) {
+      // I already know there's only one node, so pick index at 0.
+      TagNode resultNode = (TagNode) statsNode[0];
+      // get text data from HTML node
+      String attr = resultNode.getAttributeByName("src");
+      stats = resultNode.getText().toString();
+      Log.d("test", "head: " + stats);
+      Log.d("test", "attr: " + attr);
+    }
+  }*/
+
+  private void parseStartupHyderabad() {
+    for (int i = 0; i < rssItems.size(); i++) {
+      try {
+        doc = Jsoup.connect(rssItems.get(i).getLink()).get();
+//        Log.d("test", "Links: " + rssItems.get(i).getLink());
+      } catch (IOException e) {
+        e.printStackTrace();
+      }
+
+      Element titleEle = doc.select("h2.entry-title").first();
+      Element imageEle = doc.select("#main > div.main_content_wrapper > p:nth-child(4) > img,div.entry-content > p:nth-child(4) > img,div.entry-content > p:nth-child(3) img").first();
+      Elements descriptionEle = doc.select("div.main_content_wrapper");
+
+      description = descriptionEle.text();
+      if (imageEle != null)
+        imageSrc = imageEle.absUrl("src");
+      if (titleEle != null)
+        title = titleEle.text();
+      Log.d("test", "Title: " + title);
+      Log.d("test", "Image Source: " + imageSrc);
+      Log.d("test", "Description: " + description);
     }
   }
 
@@ -131,7 +209,7 @@ public class MainActivity extends FragmentActivity {
         e.printStackTrace();
       }
 
-     /* Element titleEle = doc.select("#left > div.single > div.active > h1 > a").first();
+     Element titleEle = doc.select("#left > div.single > div.active > h1 > a").first();
       Element imageEle = doc.select("div.content div a img.imgf").first();
       Elements descriptionEle = doc.select("div.pf-content");
       description = descriptionEle.text();
@@ -141,7 +219,7 @@ public class MainActivity extends FragmentActivity {
         title = titleEle.text();
       Log.d("test", "Title: " + title);
       Log.d("test", "Image Source: " + imageSrc);
-      Log.d("test", "Description: " + description);*/
+      Log.d("test", "Description: " + description);
     }
   }
 
@@ -776,9 +854,6 @@ public class MainActivity extends FragmentActivity {
   }
 
   private void parseIBNLive() {
-    String imageSrc = null;
-    String title = null;
-    StringBuffer stringBuffer = new StringBuffer();
     for (int i = 0; i < rssItems.size(); i++) {
       try {
         doc = Jsoup.connect(rssItems.get(i).getLink()).get();
@@ -802,24 +877,36 @@ public class MainActivity extends FragmentActivity {
   }
 
   private void parseTimesOfIndia() {
-    for (int i = 0; i < rssItems.size(); i++) {
-      try {
-        doc = Jsoup.connect(rssItems.get(i).getLink()).get();
-      } catch (IOException e) {
-        e.printStackTrace();
+    URL url;
+    TagNode node;
+    try {
+      url = new URL("http://timesofindia.indiatimes.com/india/2G-scam-Raja-misled-Manmohan-changed-cut-off-date-to-favour-firms-CBI-says/articleshow/46928840.cms");
+      URLConnection conn = url.openConnection();
+      InputStream in = conn.getInputStream();
+      node = htmlCleaner.clean(url);
+      Object[] objects = node.evaluateXPath("//*[@id=\"s_content\"]/div[1]/span[1]/h1");
+      for (Object o : objects) {
+        Log.d("test", "nodes: " + o.toString());
       }
-      Log.d("test", "Link: " + rssItems.get(i).getLink());
-      Element titleEle = doc.select("#s_content > div.flL.left_bdr > span.arttle > h1,span.arttle h1,div.article h2").first();
-      Element imageEle = doc.select("#bellyad > div > div.flL_pos > img").first();
-      Element descriptionEle = doc.select("div#artext1").first();
-      if (imageEle != null)
-        imageSrc = imageEle.absUrl("src");
-      if (titleEle != null)
-        title = titleEle.text();
-      Log.d("test", "Title: " + title);
-      Log.d("test", "Image source: " + imageSrc);
-      Log.d("test", "Description: " + descriptionEle.text());
+    } catch (MalformedURLException e) {
+      e.printStackTrace();
+    } catch (IOException e) {
+      e.printStackTrace();
+    } catch (XPatherException e) {
+      e.printStackTrace();
     }
+
+//    Element titleEle = doc.getElementsByTag("h1").first();
+//    Elements descEle = doc.getElementsByClass("Normal");
+//    Element e = descEle.get(0);
+//      if (imageEle != null)
+//        imageSrc = imageEle.absUrl("src");
+//    if (titleEle != null)
+//      title = titleEle.text();
+//    Log.d("test", "Title: " + title);
+//    Log.d("test", "Image source: " + imageSrc);
+//    Log.d("test", "Description: " + e.text());
+//    }
   }
 
   private void parseAndhraWishes() {
