@@ -14,8 +14,6 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import org.htmlcleaner.CleanerProperties;
 import org.htmlcleaner.HtmlCleaner;
-import org.htmlcleaner.TagNode;
-import org.htmlcleaner.XPatherException;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -23,11 +21,9 @@ import org.jsoup.select.Elements;
 import org.xml.sax.SAXException;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.SocketTimeoutException;
 import java.net.URL;
-import java.net.URLConnection;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -89,7 +85,7 @@ public class MainActivity extends FragmentActivity {
     protected Object doInBackground(Object[] params) {
       try {
         // pass source rss feed, eg: sports rss feed -- Andhra wishes
-        url = new URL("http://startuphyderabad.com/feed");
+        url = new URL("http://feeds.feedburner.com/NDTV-LatestNews?format=xml");
         feed = RssReader.read(url);
         rssItems = feed.getRssItems();
       } catch (MalformedURLException e) {
@@ -102,7 +98,7 @@ public class MainActivity extends FragmentActivity {
 //      parseTimesOfIndia();
 //      parseAndhraWishes();
 //      parseTheHindu();
-//      parseNdtv();
+      parseNdtv();
 //      parseDeccanChronicle();
 //      parseSifyNews();
 //      parseLiveMintNews();
@@ -123,7 +119,8 @@ public class MainActivity extends FragmentActivity {
 //      parseGoalIndiaNews();
 //      parseCaravenMagzineNews();
 //      parseSarkariMirrorNews();
-      parseStartupHyderabad();
+//      parseStartupHyderabad();
+//      parseTimesOfIndia();
 
       /*try {
         parseHtmlUsingXpath();
@@ -138,6 +135,26 @@ public class MainActivity extends FragmentActivity {
     @Override
     protected void onPostExecute(Object o) {
 //      pager.setAdapter(new NewsFragmentAdapter(getSupportFragmentManager()));
+    }
+  }
+
+  private void parseNdtv() {
+    for (int i = 0; i < rssItems.size(); i++) {
+      try {
+        doc = Jsoup.connect(rssItems.get(i).getLink()).userAgent("Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Ubuntu Chromium/39.0.2171.65 Chrome/39.0.2171.65 Safari/537.36").get();
+      } catch (IOException e) {
+        e.printStackTrace();
+      }
+      Element titleEle = doc.select("h1,div.storytile h1,#ContentPlaceHolder1_FullstoryCtrl_title").first();
+      Element imageEle = doc.select("#story_pic > img,p.st_bigimage > img,img#story_image_main,div.col-md-10 div.ndmv-common-img-wrapper img,div.stry-ft-img,#ContentPlaceHolder1_FullstoryCtrl_mainstoryimage").first();
+      Elements descriptionEle = doc.select("div.col-md-16 > p,div.storybody > p,div#ins_storybody,div.fullContent p,div.stry-para div p,div#ContentPlaceHolder1_FullstoryCtrl_fulldetails,div.storycontent > div.pdl200");
+      if (imageEle != null)
+        imageSrc = imageEle.absUrl("src");
+      if (titleEle != null)
+        title = titleEle.text();
+      Log.d("test", "Title: " + title);
+      Log.d("test", "Image Source: " + imageSrc);
+      Log.d("test", "Description: " + descriptionEle.text());
     }
   }
 
@@ -178,7 +195,8 @@ public class MainActivity extends FragmentActivity {
     for (int i = 0; i < rssItems.size(); i++) {
       try {
         doc = Jsoup.connect(rssItems.get(i).getLink()).get();
-//        Log.d("test", "Links: " + rssItems.get(i).getLink());
+        Log.d("test", "" + doc);
+
       } catch (IOException e) {
         e.printStackTrace();
       }
@@ -209,7 +227,7 @@ public class MainActivity extends FragmentActivity {
         e.printStackTrace();
       }
 
-     Element titleEle = doc.select("#left > div.single > div.active > h1 > a").first();
+      Element titleEle = doc.select("#left > div.single > div.active > h1 > a").first();
       Element imageEle = doc.select("div.content div a img.imgf").first();
       Elements descriptionEle = doc.select("div.pf-content");
       description = descriptionEle.text();
@@ -599,6 +617,7 @@ public class MainActivity extends FragmentActivity {
     for (int i = 0; i < rssItems.size(); i++) {
       try {
         doc = Jsoup.connect(rssItems.get(i).getLink()).get();
+//        doc = Jsoup.connect("http://www.sify.com/news/innovation-is-the-key-to-progress-and-prosperity-says-prez-news-science-pdlxLchhhgjdj.html").get();
       } catch (IOException e) {
         e.printStackTrace();
       }
@@ -610,9 +629,11 @@ public class MainActivity extends FragmentActivity {
         imageSrc = imageEle.absUrl("src");
       if (titleEle != null)
         title = titleEle.text();
+      if (descriptionEle != null)
+        description = descriptionEle.text();
       Log.d("test", "Title: " + title);
       Log.d("test", "Image Source: " + imageSrc);
-      Log.d("test", "Description: " + descriptionEle.text());
+      Log.d("test", "Description: " + description);
     }
   }
 
@@ -877,36 +898,25 @@ public class MainActivity extends FragmentActivity {
   }
 
   private void parseTimesOfIndia() {
-    URL url;
-    TagNode node;
-    try {
-      url = new URL("http://timesofindia.indiatimes.com/india/2G-scam-Raja-misled-Manmohan-changed-cut-off-date-to-favour-firms-CBI-says/articleshow/46928840.cms");
-      URLConnection conn = url.openConnection();
-      InputStream in = conn.getInputStream();
-      node = htmlCleaner.clean(url);
-      Object[] objects = node.evaluateXPath("//*[@id=\"s_content\"]/div[1]/span[1]/h1");
-      for (Object o : objects) {
-        Log.d("test", "nodes: " + o.toString());
+    String title = null;
+    String imageSrc = null;
+    for (int i = 0; i < rssItems.size(); i++) {
+      try {
+        doc = Jsoup.connect(rssItems.get(i).getLink()).userAgent("Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Ubuntu Chromium/39.0.2171.65 Chrome/39.0.2171.65 Safari/537.36").get();
+      } catch (IOException e) {
+        e.printStackTrace();
       }
-    } catch (MalformedURLException e) {
-      e.printStackTrace();
-    } catch (IOException e) {
-      e.printStackTrace();
-    } catch (XPatherException e) {
-      e.printStackTrace();
+      Element titleEle = doc.select("#s_content > div.flL.left_bdr > span.arttle > h1,span.arttle h1,div.article h2").first();
+      Element imageEle = doc.select("#bellyad > div > div.flL_pos > img").first();
+      Elements descriptionEle = doc.select("#artext1 > div,#storydiv > div.section1 > div,div.article > div.content");
+      if (imageEle != null)
+        imageSrc = imageEle.absUrl("src");
+      if (titleEle != null)
+        title = titleEle.text();
+      Log.d("test", "Title: " + title);
+      Log.d("test", "Image source: " + imageSrc);
+      Log.d("test", "Description: " + descriptionEle.text());
     }
-
-//    Element titleEle = doc.getElementsByTag("h1").first();
-//    Elements descEle = doc.getElementsByClass("Normal");
-//    Element e = descEle.get(0);
-//      if (imageEle != null)
-//        imageSrc = imageEle.absUrl("src");
-//    if (titleEle != null)
-//      title = titleEle.text();
-//    Log.d("test", "Title: " + title);
-//    Log.d("test", "Image source: " + imageSrc);
-//    Log.d("test", "Description: " + e.text());
-//    }
   }
 
   private void parseAndhraWishes() {
@@ -1027,24 +1037,6 @@ public class MainActivity extends FragmentActivity {
     }
   }
 
-  private void parseNdtv() {
-    String imageSrc = null;
-    try {
-      doc = Jsoup.connect("http://www.ndtv.com/people/a-man-who-loved-to-fly-set-on-a-mysterious-deadly-course-749967").get();
-    } catch (IOException e) {
-      e.printStackTrace();
-    }
-    Element descriptionEle = doc.select("div#ins_storybody,div.fullContent p,div.stry-para div p,div#ContentPlaceHolder1_FullstoryCtrl_fulldetails").first();
-    Element imageEle = doc.select("img#story_image_main,div.col-md-10 div.ndmv-common-img-wrapper img,div.stry-ft-img img,img#ContentPlaceHolder1_FullstoryCtrl_mainstoryimage").first();
-    Element titleEle = doc.select("div.storytile h1,h1 span#ContentPlaceHolder1_FullstoryCtrl_title").first();
-    if (imageEle != null)
-      imageSrc = imageEle.absUrl("src");
-    String title = titleEle.text();
-    String description = descriptionEle.text();
-    Log.d("test", "Title: " + title);
-    Log.d("test", "description: " + description);
-    Log.d("test", "ImageSrc: " + imageSrc);
-  }
 
   private class NewsFragmentAdapter extends FragmentPagerAdapter {
     public NewsFragmentAdapter(FragmentManager supportFragmentManager) {

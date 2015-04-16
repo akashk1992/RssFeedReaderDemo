@@ -25,16 +25,42 @@ public class HtmlParser {
   private static String description;
 
   public static void main(String[] args) throws IOException, SAXException {
-    url = new URL("http://www.informationweek.com/rss_simple.asp");
+    url = new URL("http://feeds.feedburner.com/NdtvNews-TopStories?format=xml");
     feed = RssReader.read(url);
     rssItems = feed.getRssItems();
-//    parseTimesOfIndia();
+    parseTimesOfIndia();
 //    parseHindustanTimes();
 //    parseReutersIndia();
 //    parseSiliconIndiaNews();
 //    parseInformationWeekNews();
-    parseStartupHyderabad();
+//    parseStartupHyderabad();
+    parseNdtv();
   }
+
+  private static void parseNdtv() {
+//    for (int i = 0; i < rssItems.size(); i++) {
+    try {
+      doc = Jsoup.connect("http://www.ndtv.com/india-news/after-pakistan-flag-is-raised-at-separatist-masarat-alams-rally-home-minister-speaks-to-mufti-mohamm-755357.html").get();
+      System.out.println("" + doc);
+    } catch (IOException e) {
+      e.printStackTrace();
+    }
+    Element titleEle = doc.select("h1,div.storytile h1,#ContentPlaceHolder1_FullstoryCtrl_title").first();
+    Element imageEle = doc.select("p.st_bigimage > img,img#story_image_main,div.col-md-10 div.ndmv-common-img-wrapper img,div.stry-ft-img,#ContentPlaceHolder1_FullstoryCtrl_mainstoryimage").first();
+    Elements descriptionEle = doc.select("div.storybody > p,div#ins_storybody,div.fullContent p,div.stry-para div p,div#ContentPlaceHolder1_FullstoryCtrl_fulldetails");
+    if (imageEle != null && titleEle != null && descriptionEle != null) {
+      imageSrc = imageEle.absUrl("src");
+      String title = titleEle.text();
+//      System.out.println("Title:" + title);
+//      System.out.println("Image source:" + imageSrc);
+//      System.out.println("Description:");
+      for (Element e : descriptionEle) {
+//        System.out.println(e.text());
+//        }
+      }
+    }
+  }
+
   private static void parseStartupHyderabad() {
     for (int i = 0; i < rssItems.size(); i++) {
       try {
@@ -153,7 +179,7 @@ public class HtmlParser {
         title = titleEle.text();
       System.out.println("Title:" + title);
       System.out.println("Image source:" + imageSrc);
-      System.out.println("Description:"+ descriptionEle.text());
+      System.out.println("Description:" + descriptionEle.text());
       for (Element e : descriptionEle) {
         System.out.println(e.text());
       }
