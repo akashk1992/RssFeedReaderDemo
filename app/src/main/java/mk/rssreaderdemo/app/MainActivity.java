@@ -13,6 +13,7 @@ import android.view.MenuItem;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
+import com.astuetz.PagerSlidingTabStrip;
 import org.htmlcleaner.HtmlCleaner;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -25,6 +26,7 @@ import java.net.MalformedURLException;
 import java.net.SocketTimeoutException;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 
@@ -44,6 +46,7 @@ public class MainActivity extends FragmentActivity {
   private boolean switchMe;
   private AnimatedGifImageView gifImageView;
   private Button button;
+  private PagerSlidingTabStrip pagerTabStrip;
 
   @Override
   protected void onCreate(Bundle savedInstanceState) {
@@ -52,6 +55,8 @@ public class MainActivity extends FragmentActivity {
 //    imageView = (ImageView) findViewById(R.id.image);
 //    textView = (TextView) findViewById(R.id.text);
     pager = (ViewPager) findViewById(R.id.pager);
+//    pagerTabStrip = (PagerSlidingTabStrip) findViewById(R.id.pagerTabsStrip);
+//    pagerTabStrip.setViewPager(pager);
 //    pager.setAdapter(new NewsFragmentAdapter(getSupportFragmentManager()));
 //    Ion.with(imageView).load("http://jimpunk.net/Loading/wp-content/uploads/loading1.gif");
 //    WebView webView = (WebView) findViewById(R.id.mwebview);
@@ -85,7 +90,7 @@ public class MainActivity extends FragmentActivity {
     protected Object doInBackground(Object[] params) {
       try {
         // pass source rss feed, eg: sports rss feed -- Andhra wishes
-        url = new URL("http://www.sarkarimirror.com/feed/");
+        url = new URL("http://startuphyderabad.com/feed");
         feed = RssReader.read(url);
         rssItems = feed.getRssItems();
       } catch (MalformedURLException e) {
@@ -118,8 +123,8 @@ public class MainActivity extends FragmentActivity {
 //      parseMSNNews();
 //      parseGoalIndiaNews();
 //      parseCaravenMagzineNews();
-      parseSarkariMirrorNews();
-//      parseStartupHyderabad();
+//      parseSarkariMirrorNews();
+      parseStartupHyderabad();
 
       /*try {
         parseHtmlUsingXpath();
@@ -161,22 +166,27 @@ public class MainActivity extends FragmentActivity {
     for (int i = 0; i < rssItems.size(); i++) {
       try {
         doc = Jsoup.connect(rssItems.get(i).getLink()).get();
+        Date pubDate = rssItems.get(i).getPubDate();
+        Date date = new Date(new Date().getTime() - (120 * 60 * 60 * 1000));
+        if (date.before(pubDate)) {
+          docsList.add(doc);
+        } else
+          break;
       } catch (IOException e) {
         e.printStackTrace();
       }
 
-      Element titleEle = doc.select("h2.entry-title").first();
-      Element imageEle = doc.select("#main > div.main_content_wrapper > p:nth-child(4) > img,div.entry-content > p:nth-child(4) > img,div.entry-content > p:nth-child(3) img").first();
-      Elements descriptionEle = doc.select("div.main_content_wrapper");
-
-      description = descriptionEle.text();
-      if (imageEle != null)
-        imageSrc = imageEle.absUrl("src");
-      if (titleEle != null)
-        title = titleEle.text();
-      Log.d("test", "Title: " + title);
-      Log.d("test", "Image Source: " + imageSrc);
-      Log.d("test", "Description: " + description);
+//      Element titleEle = doc.select("h2.entry-title").first();
+//      Element imageEle = doc.select("#main > div.main_content_wrapper > p:nth-child(4) > img,div.entry-content > p:nth-child(4) > img,div.entry-content > p:nth-child(3) img").first();
+//      Elements descriptionEle = doc.select("div.main_content_wrapper");
+//      description = descriptionEle.text();
+//      if (imageEle != null)
+//        imageSrc = imageEle.absUrl("src");
+//      if (titleEle != null)
+//        title = titleEle.text();
+//      Log.d("test", "Title: " + title);
+//      Log.d("test", "Image Source: " + imageSrc);
+//      Log.d("test", "Description: " + description);
     }
   }
 
@@ -906,28 +916,6 @@ public class MainActivity extends FragmentActivity {
     }
   }
 
-  private void parseHyderabadStartUps() {
-    for (int i = 0; i < rssItems.size(); i++) {
-      try {
-        doc = Jsoup.connect(rssItems.get(i).getLink()).get();
-      } catch (IOException e) {
-        e.printStackTrace();
-      }
-
-      Element descriptionEle = doc.select("p[style]").first();
-      Element imageEle = doc.select("center img").first();
-      Element titleEle = doc.select("h1").first();
-      if (imageEle != null && titleEle != null && descriptionEle != null) {
-        String imageSrc = imageEle.absUrl("src");
-        String title = titleEle.text();
-        String description = descriptionEle.text();
-        Log.d("test", "Title: " + title);
-        Log.d("test", "description: " + description);
-        Log.d("test", "ImageSrc: " + imageSrc);
-      }
-    }
-  }
-
   private void parseTheHindu() {
     String imageSrc = null;
     for (int i = 0; i < rssItems.size(); i++) {
@@ -1009,13 +997,14 @@ public class MainActivity extends FragmentActivity {
     @Override
     public Fragment getItem(int i) {
       Log.d("test", " " + i);
-        return new NewsFragment().newInstance(i);
+      return new NewsFragment().newInstance(i);
     }
 
 
     @Override
     public int getCount() {
-      return rssItems.size();
+//      return rssItems.size();
+      return docsList.size();
     }
   }
 }

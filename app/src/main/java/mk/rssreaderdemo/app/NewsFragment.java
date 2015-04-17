@@ -27,6 +27,11 @@ public class NewsFragment extends Fragment {
   private ImageView fragImageView;
   private TextView fragTextView;
   private TextView headingTextView;
+  private Element titleEle;
+  private Element imageEle;
+  private Elements descriptionEle;
+  private String description;
+  private Document doc;
 
   public Fragment newInstance(int pos) {
     Bundle bundle = new Bundle();
@@ -47,11 +52,9 @@ public class NewsFragment extends Fragment {
     int pos = bundle.getInt("pos");
     //sarkari mirror ...
     if (pos < MainActivity.docsList.size()) {
-      Document doc = MainActivity.docsList.get(pos);
-      Element titleEle = doc.select("#left > div.single > div.active > h1 > a").first();
-      Element imageEle = doc.select("div.content div a img.imgf").first();
-      Elements descriptionEle = doc.select("div.pf-content");
-      String description = descriptionEle.text();
+      doc = MainActivity.docsList.get(pos);
+//      parseElementsSarkariNaukari();
+      parseElementsStartupsHyderabad();
       if (imageEle != null)
         imageSrc = imageEle.absUrl("src");
       if (titleEle != null)
@@ -65,5 +68,19 @@ public class NewsFragment extends Fragment {
       return view;
     } else return null;
 
+  }
+
+  private void parseElementsSarkariNaukari() {
+    titleEle = doc.select("#left > div.single > div.active > h1 > a").first();
+    imageEle = doc.select("div.content div a img.imgf").first();
+    descriptionEle = doc.select("div.pf-content");
+    description = descriptionEle.text();
+  }
+
+  private void parseElementsStartupsHyderabad(){
+    titleEle = doc.select("h2.entry-title").first();
+    imageEle = doc.select("#main > div.main_content_wrapper > p:nth-child(4) > img,div.entry-content > p:nth-child(4) > img,div.entry-content > p:nth-child(3) img").first();
+    descriptionEle = doc.select("div.main_content_wrapper");
+    description = descriptionEle.text();
   }
 }
