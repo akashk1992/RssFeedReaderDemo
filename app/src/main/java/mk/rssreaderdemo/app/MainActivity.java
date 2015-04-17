@@ -10,6 +10,7 @@ import android.support.v4.view.ViewPager;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 import org.htmlcleaner.HtmlCleaner;
@@ -42,16 +43,21 @@ public class MainActivity extends FragmentActivity {
   private HtmlCleaner htmlCleaner;
   private boolean switchMe;
   private AnimatedGifImageView gifImageView;
+  private Button button;
 
   @Override
   protected void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
     setContentView(R.layout.activity_main);
-    imageView = (ImageView) findViewById(R.id.image);
-    textView = (TextView) findViewById(R.id.text);
+//    imageView = (ImageView) findViewById(R.id.image);
+//    textView = (TextView) findViewById(R.id.text);
     pager = (ViewPager) findViewById(R.id.pager);
-    pager.setAdapter(new NewsFragmentAdapter(getSupportFragmentManager()));
+//    pager.setAdapter(new NewsFragmentAdapter(getSupportFragmentManager()));
 //    Ion.with(imageView).load("http://jimpunk.net/Loading/wp-content/uploads/loading1.gif");
+//    WebView webView = (WebView) findViewById(R.id.mwebview);
+//    webView.setWebViewClient(new MyWebViewClient());
+//    webView.loadUrl("http://startuphyderabad.com/");
+//    webView.requestFocus();
     new RssAsyncTask().execute();
   }
 
@@ -79,7 +85,7 @@ public class MainActivity extends FragmentActivity {
     protected Object doInBackground(Object[] params) {
       try {
         // pass source rss feed, eg: sports rss feed -- Andhra wishes
-        url = new URL("http://dynamic.feedsportal.com/pf/555218/http://toi.timesofindia.indiatimes.com/rssfeedstopstories.cms");
+        url = new URL("http://www.sarkarimirror.com/feed/");
         feed = RssReader.read(url);
         rssItems = feed.getRssItems();
       } catch (MalformedURLException e) {
@@ -89,7 +95,7 @@ public class MainActivity extends FragmentActivity {
       } catch (IOException e) {
         e.printStackTrace();
       }
-      parseTimesOfIndia();
+//      parseTimesOfIndia();
 //      parseAndhraWishes();
 //      parseTheHindu();
 //      parseNdtv();
@@ -112,9 +118,8 @@ public class MainActivity extends FragmentActivity {
 //      parseMSNNews();
 //      parseGoalIndiaNews();
 //      parseCaravenMagzineNews();
-//      parseSarkariMirrorNews();
+      parseSarkariMirrorNews();
 //      parseStartupHyderabad();
-//      parseTimesOfIndia();
 
       /*try {
         parseHtmlUsingXpath();
@@ -128,7 +133,7 @@ public class MainActivity extends FragmentActivity {
 
     @Override
     protected void onPostExecute(Object o) {
-//      pager.setAdapter(new NewsFragmentAdapter(getSupportFragmentManager()));
+      pager.setAdapter(new NewsFragmentAdapter(getSupportFragmentManager()));
     }
   }
 
@@ -156,8 +161,6 @@ public class MainActivity extends FragmentActivity {
     for (int i = 0; i < rssItems.size(); i++) {
       try {
         doc = Jsoup.connect(rssItems.get(i).getLink()).get();
-        Log.d("test", "" + doc);
-
       } catch (IOException e) {
         e.printStackTrace();
       }
@@ -188,7 +191,7 @@ public class MainActivity extends FragmentActivity {
         e.printStackTrace();
       }
 
-      Element titleEle = doc.select("#left > div.single > div.active > h1 > a").first();
+      /*Element titleEle = doc.select("#left > div.single > div.active > h1 > a").first();
       Element imageEle = doc.select("div.content div a img.imgf").first();
       Elements descriptionEle = doc.select("div.pf-content");
       description = descriptionEle.text();
@@ -198,7 +201,7 @@ public class MainActivity extends FragmentActivity {
         title = titleEle.text();
       Log.d("test", "Title: " + title);
       Log.d("test", "Image Source: " + imageSrc);
-      Log.d("test", "Description: " + description);
+      Log.d("test", "Description: " + description);*/
     }
   }
 
@@ -1006,7 +1009,7 @@ public class MainActivity extends FragmentActivity {
     @Override
     public Fragment getItem(int i) {
       Log.d("test", " " + i);
-      return new NewsFragment().newInstance(i);
+        return new NewsFragment().newInstance(i);
     }
 
 

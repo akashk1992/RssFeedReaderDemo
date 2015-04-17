@@ -26,6 +26,7 @@ public class NewsFragment extends Fragment {
   private String title;
   private ImageView fragImageView;
   private TextView fragTextView;
+  private TextView headingTextView;
 
   public Fragment newInstance(int pos) {
     Bundle bundle = new Bundle();
@@ -40,24 +41,29 @@ public class NewsFragment extends Fragment {
     View view = inflater.inflate(R.layout.news_fragments, container, false);
     fragImageView = (ImageView) view.findViewById(R.id.frag_image);
     fragTextView = (TextView) view.findViewById(R.id.frag_text);
+    headingTextView=(TextView) view.findViewById(R.id.frag_heading);
+
     Bundle bundle = getArguments();
     int pos = bundle.getInt("pos");
-    Document doc= MainActivity.docsList.get(pos);
-    Element titleEle = doc.select("#left > div.single > div.active > h1 > a").first();
-    Element imageEle = doc.select("div.content div a img.imgf").first();
-    Elements descriptionEle = doc.select("div.pf-content");
-    String description = descriptionEle.text();
-    if (imageEle != null)
-      imageSrc = imageEle.absUrl("src");
-    if (titleEle != null)
-      title = titleEle.text();
-    Log.d("test", "Title: " + title);
-    Log.d("test", "Image Source: " + imageSrc);
-    Log.d("test", "Description: " + description);
-    Picasso.with(getActivity()).load(imageSrc).into(fragImageView);
-    fragTextView.setText(description);
-//    parseSarkariMirrorNews(pos);
+    //sarkari mirror ...
+    if (pos < MainActivity.docsList.size()) {
+      Document doc = MainActivity.docsList.get(pos);
+      Element titleEle = doc.select("#left > div.single > div.active > h1 > a").first();
+      Element imageEle = doc.select("div.content div a img.imgf").first();
+      Elements descriptionEle = doc.select("div.pf-content");
+      String description = descriptionEle.text();
+      if (imageEle != null)
+        imageSrc = imageEle.absUrl("src");
+      if (titleEle != null)
+        title = titleEle.text();
+      Log.d("test", "Title: " + title);
+      Log.d("test", "Image Source: " + imageSrc);
+      Log.d("test", "Description: " + description);
+      Picasso.with(getActivity()).load(imageSrc).placeholder(R.drawable.news_placeholder).into(fragImageView);
+      fragTextView.setText(description);
+      headingTextView.setText(title);
+      return view;
+    } else return null;
 
-    return view;
   }
 }

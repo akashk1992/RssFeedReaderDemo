@@ -9,15 +9,33 @@
                 tools:context=".MainActivity">
     <TextView android:layout_width="match_parent"
               android:layout_height="wrap_content"
-              android:id="@+id/frag_heading"/>
-    <ImageView android:layout_width="match_parent"
-               android:layout_height="wrap_content"
+              android:id="@+id/frag_heading"
+              android:textStyle="bold|italic"
+              android:layout_marginBottom="10dp"
+              android:textAlignment="center"/>
+
+    <mk.rssreaderdemo.app.ResizableImageView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:adjustViewBounds="true"
+            android:fitsSystemWindows="true"
+            android:scaleType="fitXY"
+            android:layout_below="@id/frag_heading"
+            android:id="@+id/frag_image"/>
+
+    <!--<ImageView android:layout_width="match_parent"
+               android:layout_height="200dp"
+               android:paddingLeft="10dp"
+               android:paddingRight="10dp"
+               android:scaleType="fitXY"
                android:layout_below="@id/frag_heading"
-               android:id="@+id/frag_image"/>
+               android:id="@+id/frag_image"/>-->
     <TextView
             android:id="@+id/frag_text"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:paddingLeft="10dp"
+            android:paddingRight="10dp"
             android:layout_below="@+id/frag_image"
             android:layout_marginTop="5dp"/>
 
