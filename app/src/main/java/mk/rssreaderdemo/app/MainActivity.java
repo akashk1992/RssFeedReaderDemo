@@ -12,7 +12,6 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.ImageView;
 import android.widget.TextView;
-import org.htmlcleaner.CleanerProperties;
 import org.htmlcleaner.HtmlCleaner;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -41,6 +40,8 @@ public class MainActivity extends FragmentActivity {
   private ViewPager pager;
   public static List<Document> docsList = new ArrayList<Document>();
   private HtmlCleaner htmlCleaner;
+  private boolean switchMe;
+  private AnimatedGifImageView gifImageView;
 
   @Override
   protected void onCreate(Bundle savedInstanceState) {
@@ -49,17 +50,10 @@ public class MainActivity extends FragmentActivity {
     imageView = (ImageView) findViewById(R.id.image);
     textView = (TextView) findViewById(R.id.text);
     pager = (ViewPager) findViewById(R.id.pager);
-    htmlCleaner = new HtmlCleaner();
-    CleanerProperties props = htmlCleaner.getProperties();
-    props.setCharset("UTF-8");
-    props.setAllowHtmlInsideAttributes(false);
-    props.setAllowMultiWordAttributes(true);
-    props.setRecognizeUnicodeChars(true);
-    props.setOmitComments(true);
-//    pager.setAdapter(new NewsFragmentAdapter(getSupportFragmentManager()));
+    pager.setAdapter(new NewsFragmentAdapter(getSupportFragmentManager()));
+//    Ion.with(imageView).load("http://jimpunk.net/Loading/wp-content/uploads/loading1.gif");
     new RssAsyncTask().execute();
   }
-
 
   @Override
   public boolean onCreateOptionsMenu(Menu menu) {
@@ -85,7 +79,7 @@ public class MainActivity extends FragmentActivity {
     protected Object doInBackground(Object[] params) {
       try {
         // pass source rss feed, eg: sports rss feed -- Andhra wishes
-        url = new URL("http://feeds.feedburner.com/NDTV-LatestNews?format=xml");
+        url = new URL("http://dynamic.feedsportal.com/pf/555218/http://toi.timesofindia.indiatimes.com/rssfeedstopstories.cms");
         feed = RssReader.read(url);
         rssItems = feed.getRssItems();
       } catch (MalformedURLException e) {
@@ -95,10 +89,10 @@ public class MainActivity extends FragmentActivity {
       } catch (IOException e) {
         e.printStackTrace();
       }
-//      parseTimesOfIndia();
+      parseTimesOfIndia();
 //      parseAndhraWishes();
 //      parseTheHindu();
-      parseNdtv();
+//      parseNdtv();
 //      parseDeccanChronicle();
 //      parseSifyNews();
 //      parseLiveMintNews();
@@ -146,8 +140,8 @@ public class MainActivity extends FragmentActivity {
         e.printStackTrace();
       }
       Element titleEle = doc.select("h1,div.storytile h1,#ContentPlaceHolder1_FullstoryCtrl_title").first();
-      Element imageEle = doc.select("#story_pic > img,p.st_bigimage > img,img#story_image_main,div.col-md-10 div.ndmv-common-img-wrapper img,div.stry-ft-img,#ContentPlaceHolder1_FullstoryCtrl_mainstoryimage").first();
-      Elements descriptionEle = doc.select("div.col-md-16 > p,div.storybody > p,div#ins_storybody,div.fullContent p,div.stry-para div p,div#ContentPlaceHolder1_FullstoryCtrl_fulldetails,div.storycontent > div.pdl200");
+      Element imageEle = doc.select("#story_pic > img,p.st_bigimage > img,img#story_image_main,div.col-md-10 div.ndmv-common-img-wrapper img,div.stry-ft-img img,#ContentPlaceHolder1_FullstoryCtrl_mainstoryimage").first();
+      Elements descriptionEle = doc.select("div.whosaid_intro,div.col-md-16 > p,div.storybody > p,div#ins_storybody,div.fullContent p,div.stry-para div p,div#ContentPlaceHolder1_FullstoryCtrl_fulldetails,div.storycontent > div.pdl200,div.fullContent");
       if (imageEle != null)
         imageSrc = imageEle.absUrl("src");
       if (titleEle != null)
@@ -157,39 +151,6 @@ public class MainActivity extends FragmentActivity {
       Log.d("test", "Description: " + descriptionEle.text());
     }
   }
-
-  /*private void parseHtmlUsingXpath() throws Exception {
-    String stats = "";
-    final String BLOG_URL = "http://timesofindia.indiatimes.com/india/2G-scam-Raja-misled-Manmohan-changed-cut-off-date-to-favour-firms-CBI-says/articleshow/46928840.cms";
-    // XPath query
-    final String XPATH_STATS = "/*//*[@id=\"bellyad\"]/div/div[1]/img";
-    // config cleaner properties
-    HtmlCleaner htmlCleaner = new HtmlCleaner();
-    CleanerProperties props = htmlCleaner.getProperties();
-    props.setAllowHtmlInsideAttributes(false);
-    props.setAllowMultiWordAttributes(true);
-    props.setRecognizeUnicodeChars(true);
-    props.setOmitComments(true);
-
-    // create URL object
-    // get HTML page root node
-    TagNode root = null;
-    URL url = new URL(BLOG_URL);
-    root = htmlCleaner.clean(url);
-    Object[] statsNode = root.evaluateXPath(XPATH_STATS);
-
-    // query XPath
-    // process data if found any node
-    if (statsNode.length > 0) {
-      // I already know there's only one node, so pick index at 0.
-      TagNode resultNode = (TagNode) statsNode[0];
-      // get text data from HTML node
-      String attr = resultNode.getAttributeByName("src");
-      stats = resultNode.getText().toString();
-      Log.d("test", "head: " + stats);
-      Log.d("test", "attr: " + attr);
-    }
-  }*/
 
   private void parseStartupHyderabad() {
     for (int i = 0; i < rssItems.size(); i++) {
@@ -1036,7 +997,6 @@ public class MainActivity extends FragmentActivity {
       Log.d("test", "ImageSrc: " + imageSrc);
     }
   }
-
 
   private class NewsFragmentAdapter extends FragmentPagerAdapter {
     public NewsFragmentAdapter(FragmentManager supportFragmentManager) {
