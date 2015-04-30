@@ -25,16 +25,17 @@ public class HtmlParser {
   private static String description;
 
   public static void main(String[] args) throws IOException, SAXException {
-    url = new URL("http://feeds.feedburner.com/NdtvNews-TopStories?format=xml");
+    url = new URL("http://timesofindia.feedsportal.com/c/33039/f/533919/index.rss");
     feed = RssReader.read(url);
     rssItems = feed.getRssItems();
-    parseTimesOfIndia();
+//    parseTimesOfIndia();
 //    parseHindustanTimes();
 //    parseReutersIndia();
 //    parseSiliconIndiaNews();
 //    parseInformationWeekNews();
 //    parseStartupHyderabad();
-    parseNdtv();
+//    parseNdtv();
+    parseTimesOfIndia();
   }
 
   private static void parseNdtv() {

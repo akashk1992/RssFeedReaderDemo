@@ -8,8 +8,8 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.util.Log;
-import android.view.Menu;
-import android.view.MenuItem;
+import android.view.*;
+import android.widget.BaseAdapter;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -20,13 +20,14 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 import org.xml.sax.SAXException;
+import org.xmlpull.v1.XmlPullParser;
+import org.xmlpull.v1.XmlPullParserFactory;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.SocketTimeoutException;
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 
@@ -52,9 +53,34 @@ public class MainActivity extends FragmentActivity {
   protected void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
     setContentView(R.layout.activity_main);
+    new RssAsynchTask().execute();
+
+   /* String[] web = {
+        "Google",
+        "Github",
+        "Instagram",
+        "Facebook",
+        "Flickr",
+        "Pinterest",
+        "Quora",
+        "Twitter"
+    };
+
+    int[] imageId = {
+        R.drawable.news,
+        R.drawable.news,
+        R.drawable.news,
+        R.drawable.news,
+        R.drawable.news,
+        R.drawable.news,
+        R.drawable.news,
+        R.drawable.news
+    };*/
 //    imageView = (ImageView) findViewById(R.id.image);
 //    textView = (TextView) findViewById(R.id.text);
-    pager = (ViewPager) findViewById(R.id.pager);
+//    pager = (ViewPager) findViewById(R.id.pager);
+//    GridView gridView = (GridView) findViewById(R.id.grid_view);
+//    gridView.setAdapter(new CustomeGridAdapter(this, web, imageId));
 //    pagerTabStrip = (PagerSlidingTabStrip) findViewById(R.id.pagerTabsStrip);
 //    pagerTabStrip.setViewPager(pager);
 //    pager.setAdapter(new NewsFragmentAdapter(getSupportFragmentManager()));
@@ -63,7 +89,7 @@ public class MainActivity extends FragmentActivity {
 //    webView.setWebViewClient(new MyWebViewClient());
 //    webView.loadUrl("http://startuphyderabad.com/");
 //    webView.requestFocus();
-    new RssAsyncTask().execute();
+//    new RssAsyncTask().execute();
   }
 
   @Override
@@ -90,7 +116,7 @@ public class MainActivity extends FragmentActivity {
     protected Object doInBackground(Object[] params) {
       try {
         // pass source rss feed, eg: sports rss feed -- Andhra wishes
-        url = new URL("http://startuphyderabad.com/feed");
+        url = new URL("http://timesofindia.feedsportal.com/c/33039/f/533921/index.rss");
         feed = RssReader.read(url);
         rssItems = feed.getRssItems();
       } catch (MalformedURLException e) {
@@ -100,7 +126,7 @@ public class MainActivity extends FragmentActivity {
       } catch (IOException e) {
         e.printStackTrace();
       }
-//      parseTimesOfIndia();
+      parseTimesOfIndia();
 //      parseAndhraWishes();
 //      parseTheHindu();
 //      parseNdtv();
@@ -124,7 +150,7 @@ public class MainActivity extends FragmentActivity {
 //      parseGoalIndiaNews();
 //      parseCaravenMagzineNews();
 //      parseSarkariMirrorNews();
-      parseStartupHyderabad();
+//      parseStartupHyderabad();
 
       /*try {
         parseHtmlUsingXpath();
@@ -151,7 +177,7 @@ public class MainActivity extends FragmentActivity {
       }
       Element titleEle = doc.select("h1,div.storytile h1,#ContentPlaceHolder1_FullstoryCtrl_title").first();
       Element imageEle = doc.select("#story_pic > img,p.st_bigimage > img,img#story_image_main,div.col-md-10 div.ndmv-common-img-wrapper img,div.stry-ft-img img,#ContentPlaceHolder1_FullstoryCtrl_mainstoryimage").first();
-      Elements descriptionEle = doc.select("div.whosaid_intro,div.col-md-16 > p,div.storybody > p,div#ins_storybody,div.fullContent p,div.stry-para div p,div#ContentPlaceHolder1_FullstoryCtrl_fulldetails,div.storycontent > div.pdl200,div.fullContent");
+      Elements descriptionEle = doc.select("div.whosaid_intro,div.col-md-16 > p,div.storybody > p,div.ins_storybody,div#ins_storybody,div.fullContent p,div.stry-para div p,div#ContentPlaceHolder1_FullstoryCtrl_fulldetails,div.storycontent > div.pdl200,div.fullContent");
       if (imageEle != null)
         imageSrc = imageEle.absUrl("src");
       if (titleEle != null)
@@ -163,18 +189,16 @@ public class MainActivity extends FragmentActivity {
   }
 
   private void parseStartupHyderabad() {
-    for (int i = 0; i < rssItems.size(); i++) {
+    for (int i = 0; i < 1; i++) {
+
       try {
         doc = Jsoup.connect(rssItems.get(i).getLink()).get();
-        Date pubDate = rssItems.get(i).getPubDate();
-        Date date = new Date(new Date().getTime() - (120 * 60 * 60 * 1000));
-        if (date.before(pubDate)) {
-          docsList.add(doc);
-        } else
-          break;
       } catch (IOException e) {
         e.printStackTrace();
       }
+//      Date pubDate = rssItems.get(i).getPubDate();
+//      Date date = new Date(new Date().getTime() - (120 * 60 * 60 * 1000));
+      docsList.add(doc);
 
 //      Element titleEle = doc.select("h2.entry-title").first();
 //      Element imageEle = doc.select("#main > div.main_content_wrapper > p:nth-child(4) > img,div.entry-content > p:nth-child(4) > img,div.entry-content > p:nth-child(3) img").first();
@@ -872,15 +896,14 @@ public class MainActivity extends FragmentActivity {
   }
 
   private void parseTimesOfIndia() {
-    String title = null;
-    String imageSrc = null;
-    for (int i = 0; i < rssItems.size(); i++) {
+    for (int i = 0; i < 5; i++) {
       try {
         doc = Jsoup.connect(rssItems.get(i).getLink()).userAgent("Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Ubuntu Chromium/39.0.2171.65 Chrome/39.0.2171.65 Safari/537.36").get();
+        docsList.add(doc);
       } catch (IOException e) {
         e.printStackTrace();
       }
-      Element titleEle = doc.select("#s_content > div.flL.left_bdr > span.arttle > h1,span.arttle h1,div.article h2").first();
+      /*Element titleEle = doc.select("#s_content > div.flL.left_bdr > span.arttle > h1,span.arttle h1,div.article h2").first();
       Element imageEle = doc.select("#bellyad > div > div.flL_pos > img").first();
       Elements descriptionEle = doc.select("#artext1 > div,#storydiv > div.section1 > div,div.article > div.content");
       if (imageEle != null)
@@ -889,7 +912,7 @@ public class MainActivity extends FragmentActivity {
         title = titleEle.text();
       Log.d("test", "Title: " + title);
       Log.d("test", "Image source: " + imageSrc);
-      Log.d("test", "Description: " + descriptionEle.text());
+      Log.d("test", "Description: " + descriptionEle.text());*/
     }
   }
 
@@ -1007,5 +1030,91 @@ public class MainActivity extends FragmentActivity {
       return docsList.size();
     }
   }
-}
 
+  private class CustomeGridAdapter extends BaseAdapter {
+    private final MainActivity mContext;
+    private int[] imageid;
+    private final String[] web;
+
+    public CustomeGridAdapter(MainActivity mainActivity, String[] web, int[] imageId) {
+      mContext = mainActivity;
+      this.imageid = imageId;
+      this.web = web;
+    }
+
+    @Override
+    public int getCount() {
+      return web.length;
+    }
+
+    @Override
+    public Object getItem(int position) {
+      return null;
+    }
+
+    @Override
+    public long getItemId(int position) {
+      return 0;
+    }
+
+
+    @Override
+    public View getView(int position, View convertView, ViewGroup parent) {
+      LayoutInflater inflater = (LayoutInflater) mContext.getSystemService(LAYOUT_INFLATER_SERVICE);
+      View rootView = inflater.inflate(R.layout.grid_item, null);
+      ImageView imageView1 = (ImageView) rootView.findViewById(R.id.grid_image);
+      TextView textView1 = (TextView) rootView.findViewById(R.id.grid_text);
+      textView1.setText(web[position]);
+      imageView1.setImageResource(imageid[position]);
+      return rootView;
+    }
+  }
+
+  private class RssAsynchTask extends AsyncTask {
+    private XmlPullParser xpp;
+    private int eventType;
+
+    @Override
+    protected Object doInBackground(Object[] params) {
+      final String url = "http://dynamic.feedsportal.com/pf/555218/http://toi.timesofindia.indiatimes.com/rssfeedstopstories.cms";
+      XmlPullParserFactory factory = null;
+      try {
+        factory = XmlPullParserFactory.newInstance();
+        xpp = factory.newPullParser();
+        URL input = new URL(url);
+        xpp.setInput(input.openStream(), null);
+        eventType = xpp.getEventType();
+      } catch (Exception e) {
+        e.printStackTrace();
+      }
+      factory.setNamespaceAware(true);
+      String name = null;
+      while (eventType != XmlPullParser.END_DOCUMENT) {
+        switch (eventType) {
+          case XmlPullParser.START_DOCUMENT:
+            break;
+          case XmlPullParser.START_TAG:
+            name = xpp.getName();//returns tag name
+            if (name.equalsIgnoreCase("item")) {
+              Log.d("test", "name: " + name);
+            }
+            break;
+          case XmlPullParser.TEXT:
+            if (name.equalsIgnoreCase("title"))
+              Log.d("test", "text: " + xpp.getText());
+            if (name.equalsIgnoreCase("pubDate"))
+              Log.d("test", "text: " + xpp.getText());
+            break;
+          case XmlPullParser.END_TAG:
+            break;
+        }
+        try {
+          eventType = xpp.next();//next tag and return to switch with new one
+        } catch (Exception e) {
+          e.printStackTrace();
+        }
+      }
+      return null;
+    }
+  }
+}
